@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  <title>Twoje konto</title>
+{% endblock %}
+
+{% block header %}
+    <div class="container">
+        {% if user.is_authenticated %}
+        <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+        <h2>{{ user.email }}</h2>
+        {% else %}
+        <p>Tylko dla zalogowanych użytkowników.
+            <a href="{% url 'login' %}">Zaloguj</a>
+        </p>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        {% if donations %}
+            <h2 id="">Przekazane dary:</h2>
+            <ul>
+                {% for donation in donations %}
+                    <li class="slogan container container--90" >
+                        <p>Przekazano {{ donation.quantity }} worków dla {{ donation.institution }}.</p>
+                            <p>
+                                Kategorie:
+                                {% for category in donation.categories.all %}
+                                {{ category }}
+                                {% endfor %}
+                            </p>
+                        <p>Termin odbioru: {{ donation.pick_up_date }}, {{ donation.pick_up_time }}</p>
+                        <button type="submit"><a href="/archive/{{ donation.id }}">Archiwizuj</button></a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+        <div class="">
+                <h1>Nie przekazałes żadnego daru. Przekaż swój pierwszy dar.</h1>
+                <a class="btn btn-success" href="{% url 'add-donation' %}" role="button">Dodaj darowiznę</a>
+        </div>
+        {% endif %}
+
+    </div>
+    {% endblock %}
