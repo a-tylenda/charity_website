@@ -2,16 +2,31 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, get_object_or_404, redirect
+from django.db.models import Sum
 from django.views import View
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
 from django.urls import reverse, reverse_lazy
 from .models import Category, Institution, Donation, CustomUser
 from .forms import RegistrationForm, LoginForm, DonationForm
 
 
+class AddDonationView(LoginRequiredMixin, View):
+    login_url = '/login/'
+
+    def get(self, request):
+        categories = Category.objects.all()
+        ctx = {'categories': categories}
+        return render(request, 'form.html', ctx)
+
+
+class AddDonationConfView(View):
+    def get(self, request):
+        return render(request, 'form-confirmation.html')
+
+
 class LandingPageView(View):
     def get(self, request):
-        donations = Donation.objects.all().count()
+        donations = Donation.objects.all().aggregate(Sum('quantity'))['quantity__sum']
         institutions = Institution.objects.all().count()
         foundations = Institution.objects.filter(type=Institution.FUNDACJA)
         organizations = Institution.objects.filter(type=Institution.ORGANIZACJA_POZARZADOWA)
@@ -24,19 +39,6 @@ class LandingPageView(View):
             "local_collections": local_collections
         }
         return render(request, 'index.html', ctx)
-
-
-class AddDonationView(LoginRequiredMixin, View):
-    login_url = '/login/'
-
-    def get(self, request):
-        ctx = {}
-        return render(request, 'form.html', ctx)
-
-
-class AddDonationConfView(View):
-    def get(self, request):
-        return render(request, 'form-confirmation.html')
 
 
 class LoginView(FormView):
@@ -74,12 +76,9 @@ class ProfileView(View):
     def get(self, request):
         user = CustomUser.objects.get(pk=self.request.user.id)
         donations = Donation.objects.filter(user_id=user.id)
-        categories = Category.objects.all()
+
         ctx = {
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'email': user.email,
-            'donations': donations,
-            'categories': categories,
+            'user': user,
+            'donations': donations
         }
         return render(request, 'profile.html', ctx)

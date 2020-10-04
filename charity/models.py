@@ -58,6 +58,10 @@ class CustomUser(AbstractUser):
 
     objects = CustomUserManager()
 
+    class Meta:
+        verbose_name = 'Użytkownik'
+        verbose_name_plural = 'Użytkownicy'
+
 
 class Category(models.Model):
     name = models.CharField(max_length=128)
@@ -65,6 +69,9 @@ class Category(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+    class Meta:
+        verbose_name = 'Kategoria'
+        verbose_name_plural = 'Kategorie'
 
 class Institution(models.Model):
     FUNDACJA = 0
@@ -83,7 +90,11 @@ class Institution(models.Model):
     categories = models.ManyToManyField("Category")
 
     def __str__(self):
-        return f"{self.name}"
+        return f'{self.name} ({self.get_type_display()})'
+
+    class Meta:
+        verbose_name = 'Instytucja'
+        verbose_name_plural = 'Instytucje'
 
     
 class Donation(models.Model):
@@ -100,7 +111,9 @@ class Donation(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, default=None)
 
     def __str__(self):
-        return f"{self.user.username} {self.categories.name} {self.quantity}"
+        return f'{self.user.first_name} przekazał/a {self.quantity} worków dla organizacji "{self.institution.name}"'
 
-
+    class Meta:
+        verbose_name = 'Dar'
+        verbose_name_plural = 'Dary'
 

@@ -24,10 +24,10 @@
                   <ul class="dropdown">
                     <li><a href="{% url 'profile' %}">Profil</a></li>
                     <li><a href="#">Ustawienia</a></li>
+                    {% if user.is_superuser %}
+                    <li><a href="/admin/">Panel administracyjny</a></li>
+                    {% endif %}
                     <li><a href="{% url 'logout' %}">Wyloguj</a></li>
-                      {% if user.admin %}
-                      <li><a href="/admin/">Panel administracyjny</a></li>
-                      {% endif %}
                   </ul>
               </li>
           {% else %}
